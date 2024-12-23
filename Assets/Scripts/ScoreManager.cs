@@ -1,12 +1,12 @@
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.IO;
-using Unity.Android.Gradle.Manifest;
+using UnityEngine.Rendering;
 public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager Instance;
-    public SaveData maxScoreData;
+    public string curPlayerName= "Developer";
+    public SaveData maxScoreData = new SaveData();
     public void Awake()
     {
         // start of new code
@@ -19,10 +19,7 @@ public class ScoreManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-    }
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
+
         LoadScore();
     }
 
@@ -32,20 +29,16 @@ public class ScoreManager : MonoBehaviour
         public string name;
         public int score;
     }
-    public void SaveScore(int score, string name)
+    public void SaveScore()
     {
-        SaveData playerData = new SaveData();
-        playerData.score = score;
-        playerData.name = name;
+        string json = JsonUtility.ToJson(maxScoreData);
 
-        string json = JsonUtility.ToJson(playerData);
-
-        File.WriteAllText(UnityEngine.Application.persistentDataPath + "/savefile.json", json);
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
     }
 
     public void LoadScore()
     {
-        string path = UnityEngine.Application.persistentDataPath + "/savefile.json";
+        string path = Application.persistentDataPath + "/savefile.json";
         if (File.Exists(path))
         {
             string json = File.ReadAllText(path);
@@ -53,5 +46,18 @@ public class ScoreManager : MonoBehaviour
 
             maxScoreData = data;
         }
+        else
+        {
+            maxScoreData.name = ".....";
+            maxScoreData.score = 0;
+        }
+    }
+
+    public void EditAndSaveMaxScore(int score)
+    {
+        maxScoreData.name = curPlayerName;
+        maxScoreData.score = score;
+
+        SaveScore();
     }
 }
